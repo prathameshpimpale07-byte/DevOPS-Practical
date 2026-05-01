@@ -1,0 +1,62 @@
+pipeline {
+    agent any
+
+    stages {
+
+        stage('Clone Repository') {
+            steps {
+                git 'YOUR_GITHUB_REPO_URL'
+            }
+        }
+
+        stage('Give Permission') {
+            steps {
+                sh 'chmod +x mvnw'
+            }
+        }
+
+        stage('Build Application') {
+            steps {
+                sh './mvnw clean compile'
+            }
+        }
+
+        stage('Run Test Cases') {
+            steps {
+                sh './mvnw test'
+            }
+        }
+
+        stage('Generate JAR File') {
+            steps {
+                sh './mvnw package'
+            }
+        }
+
+        stage('Check Artifact') {
+            steps {
+                sh 'ls target/'
+            }
+        }
+
+        stage('Deploy to AWS EC2') {
+            steps {
+                sh '''
+                scp -i /var/lib/jenkins/.ssh/my-key.pem \
+                -o StrictHostKeyChecking=no \
+                target/*.jar ubuntu@EC2_PUBLIC_IP:/home/ubuntu/app.jar
+
+                ssh -i /var/lib/jenkins/.ssh/my-key.pem \
+                ubuntu@EC2_PUBLIC_IP << EOF
+
+                pkill java || true
+
+                nohup java -jar /home/ubuntu/app.jar \
+                > /home/ubuntu/app.log 2>&1 &
+
+                EOF
+                '''
+            }
+        }
+    }
+}
