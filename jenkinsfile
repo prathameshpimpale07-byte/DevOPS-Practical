@@ -5,7 +5,7 @@ pipeline {
 
         stage('Clone Repository') {
             steps {
-                git 'YOUR_GITHUB_REPO_URL'
+                git 'https://github.com/prathameshpimpale07-byte/DevOPS-Practical'
             }
         }
 
@@ -44,10 +44,10 @@ pipeline {
                 sh '''
                 scp -i /var/lib/jenkins/.ssh/my-key.pem \
                 -o StrictHostKeyChecking=no \
-                target/*.jar ubuntu@EC2_PUBLIC_IP:/home/ubuntu/app.jar
+                target/*.jar ubuntu@56.228.35.96:/home/ubuntu/app.jar
 
                 ssh -i /var/lib/jenkins/.ssh/my-key.pem \
-                ubuntu@EC2_PUBLIC_IP << EOF
+                ubuntu@56.228.35.96 << EOF
 
                 pkill java || true
 
